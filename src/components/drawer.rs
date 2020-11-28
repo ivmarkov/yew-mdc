@@ -6,6 +6,10 @@ pub mod content;
 pub use content::Content;
 pub mod header;
 pub use header::Header;
+pub mod title;
+pub use title::Title;
+pub mod subtitle;
+pub use subtitle::Subtitle;
 
 pub struct Drawer {
     node_ref: NodeRef,

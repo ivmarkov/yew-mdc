@@ -44,6 +44,8 @@ cfg_if! {
         pub use drawer::Content as DrawerContent;
         pub use drawer::Drawer;
         pub use drawer::Header as DrawerHeader;
+        pub use drawer::Title as DrawerTitle;
+        pub use drawer::Subtitle as DrawerSubtitle;
     }
 }
 
