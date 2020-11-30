@@ -15,7 +15,7 @@ extern "C" {
     pub fn destroy(this: &MDCComponent);
 }
 
-#[cfg(any(feature = "button", feature = "fab"))]
+#[cfg(any(feature = "button", feature = "fab", feature = "list"))]
 #[wasm_bindgen(module = "@material/ripple/index")]
 extern "C" {
     /// MDC Ripple provides the JavaScript and CSS required to provide components

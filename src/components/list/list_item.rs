@@ -1,3 +1,5 @@
+use crate::mdc_sys::MDCRipple;
+use web_sys::Element;
 use core::fmt;
 use yew::prelude::*;
 
@@ -30,6 +32,8 @@ impl fmt::Display for Role {
 pub struct Item {
     props: Props,
     node_ref: NodeRef,
+    ripple: Option<MDCRipple>,
+    link: ComponentLink<Self>,
 }
 
 #[derive(Properties, Clone, PartialEq)]
@@ -44,16 +48,37 @@ pub struct Props {
 
     #[prop_or_default]
     pub selected: bool,
+
+    #[prop_or(-1)]
+    pub tabindex: i32,
+
+    #[prop_or_else(Callback::noop)]
+    pub onclick: Callback<MouseEvent>,
+}
+
+pub enum Msg {
+    Clicked(MouseEvent),
 }
 
 impl Component for Item {
-    type Message = ();
+    type Message = Msg;
     type Properties = Props;
 
-    fn create(props: Self::Properties, _link: ComponentLink<Self>) -> Self {
+    fn create(props: Self::Properties, link: ComponentLink<Self>) -> Self {
         Self {
             props,
+            ripple: None,
             node_ref: NodeRef::default(),
+            link,
+        }
+    }
+
+    fn rendered(&mut self, first_render: bool) {
+        if first_render {
+            if let Some(ripple) = self.ripple.take() {
+                ripple.destroy();
+            }
+            self.ripple = self.node_ref.cast::<Element>().map(MDCRipple::new);
         }
     }
 
@@ -66,7 +91,12 @@ impl Component for Item {
         }
     }
 
-    fn update(&mut self, _msg: Self::Message) -> ShouldRender {
+    fn update(&mut self, msg: Self::Message) -> ShouldRender {
+        match msg {
+            Msg::Clicked(ev) => {
+                self.props.onclick.emit(ev);
+            }
+        }
         false
     }
 
@@ -76,13 +106,20 @@ impl Component for Item {
             <li class=classes
                  ref=self.node_ref.clone()
                  role=self.props.role
+                 tabindex=self.props.tabindex
                  aria_selected=self.props.selected
                  id=&self.props.id
-                 onclick=Callback::noop()
+                 onclick=self.link.callback(Msg::Clicked)
                 >
                 <span class="mdc-list-item__ripple"></span>
                 { self.props.children.clone() }
             </li>
+        }
+    }
+
+    fn destroy(&mut self) {
+        if let Some(ripple) = &self.ripple {
+            ripple.destroy();
         }
     }
 }
