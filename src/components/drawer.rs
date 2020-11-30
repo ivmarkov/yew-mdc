@@ -15,6 +15,7 @@ pub struct Drawer {
     node_ref: NodeRef,
     inner: Option<MDCDrawer>,
     props: Props,
+    link: ComponentLink<Self>,
 }
 
 #[derive(PartialEq, Clone, Copy, Debug)]
@@ -51,17 +52,25 @@ pub struct Props {
     pub classes: String,
     #[prop_or_default]
     pub open: bool,
+
+    #[prop_or_else(Callback::noop)]
+    pub onscrimclick: Callback<MouseEvent>,
+}
+
+pub enum Msg {
+    ScrimClicked(MouseEvent),
 }
 
 impl Component for Drawer {
-    type Message = ();
+    type Message = Msg;
     type Properties = Props;
 
-    fn create(props: Self::Properties, _link: ComponentLink<Self>) -> Self {
+    fn create(props: Self::Properties, link: ComponentLink<Self>) -> Self {
         Self {
             node_ref: NodeRef::default(),
             props,
             inner: None,
+            link,
         }
     }
 
@@ -97,7 +106,12 @@ impl Component for Drawer {
     //     false
     // }
 
-    fn update(&mut self, _msg: Self::Message) -> ShouldRender {
+    fn update(&mut self, msg: Self::Message) -> ShouldRender {
+        match msg {
+            Msg::ScrimClicked(ev) => {
+                self.props.onscrimclick.emit(ev);
+            }
+        }
         false
     }
 
@@ -111,7 +125,7 @@ impl Component for Drawer {
             >
                 { self.props.children.clone() }
             </aside>
-            {if self.props.style == Style::Modal {html!{<div class="mdc-drawer-scrim"></div>}} else {html!{}}}
+            {if self.props.style == Style::Modal {html!{<div class="mdc-drawer-scrim" onclick=self.link.callback(Msg::ScrimClicked)></div>}} else {html!{}}}
             </>
         }
     }
