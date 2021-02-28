@@ -49,6 +49,9 @@ pub struct Props {
     #[prop_or_default]
     pub selected: bool,
 
+    #[prop_or_default]
+    pub value: String,
+
     #[prop_or(-1)]
     pub tabindex: i32,
 
@@ -107,8 +110,9 @@ impl Component for Item {
                  ref=self.node_ref.clone()
                  role=self.props.role
                  tabindex=self.props.tabindex
-                 aria_selected=self.props.selected
+                 aria-selected=self.props.selected
                  id=&self.props.id
+                 data-value=self.props.value
                  onclick=self.link.callback(Msg::Clicked)
                 >
                 <span class="mdc-list-item__ripple"></span>

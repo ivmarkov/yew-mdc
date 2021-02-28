@@ -1,17 +1,19 @@
-use crate::mdc_sys::MDCTextField;
+use crate::mdc_sys::MDCSelect;
+
 use web_sys::Element;
+
+use wasm_bindgen::{prelude::*, JsCast};
 use yew::prelude::*;
 
 pub mod helper_line;
 pub use helper_line::HelperLine;
 
-pub mod text_area;
-
-pub struct TextField {
+pub struct Select {
     node_ref: NodeRef,
-    inner: Option<MDCTextField>,
+    inner: Option<MDCSelect>,
     props: Props,
     link: ComponentLink<Self>,
+    change_callback: Closure<dyn FnMut(web_sys::Event)>,
 }
 
 #[derive(PartialEq, Properties, Clone, Debug)]
@@ -34,8 +36,6 @@ pub struct Props {
     pub valid: Option<bool>,
     #[prop_or_else(Callback::noop)]
     pub onchange: Callback<String>,
-    #[prop_or_else(Callback::noop)]
-    pub onkeydown: Callback<KeyboardEvent>,
     #[prop_or_default]
     pub children: Children,
     #[prop_or_default]
@@ -44,11 +44,10 @@ pub struct Props {
 
 pub enum Msg {
     ValueChanged(String),
-    KeyDown(KeyboardEvent),
     FocusRequested,
 }
 
-impl Component for TextField {
+impl Component for Select {
     type Message = Msg;
     type Properties = Props;
 
@@ -57,10 +56,26 @@ impl Component for TextField {
             let my_callback = link.callback(|_| Msg::FocusRequested);
             callback.emit(my_callback);
         }
+
+        let callback = link.callback(Msg::ValueChanged);
+        let closure = Closure::wrap(Box::new(move |e: web_sys::Event| {
+            if let Some(e) = e.dyn_ref::<web_sys::CustomEvent>() {
+                e.stop_propagation();
+                if let Ok(value) = e.detail().into_serde::<serde_json::Value>() {
+                    if let Some(value) = value.get("value").and_then(|v| v.as_str()) {
+                        let string = value.to_owned();
+                        callback.emit(string);
+                    }
+                }
+            }
+            e.stop_propagation();
+        }) as Box<dyn FnMut(web_sys::Event)>);
+
         Self {
             node_ref: NodeRef::default(),
             props,
             inner: None,
+            change_callback: closure,
             link,
         }
     }
@@ -68,20 +83,13 @@ impl Component for TextField {
     fn rendered(&mut self, first_render: bool) {
         if first_render {
             if let Some(inner) = self.inner.take() {
+                inner.unlisten("MDCSelect:change", &self.change_callback);
                 inner.destroy();
             }
-            self.inner = self.node_ref.cast::<Element>().map(MDCTextField::new);
+            self.inner = self.node_ref.cast::<Element>().map(MDCSelect::new);
             if let Some(inner) = &self.inner {
-                match self.props.valid {
-                    None => {
-                        inner.set_use_native_validation(true);
-                        inner.set_valid(true);
-                    },
-                    Some(valid) => {
-                        inner.set_use_native_validation(false);
-                        inner.set_valid(valid);
-                    }
-                }
+                inner.listen("MDCSelect:change", &self.change_callback);
+                inner.set_value(&self.props.value);
             }
         }
     }
@@ -94,16 +102,10 @@ impl Component for TextField {
             }
             self.props = props;
             if let Some(inner) = &self.inner {
-                inner.set_value(&self.props.value);
-                match self.props.valid {
-                    None => {
-                        inner.set_use_native_validation(true);
-                        inner.set_valid(true);
-                    },
-                    Some(valid) => {
-                        inner.set_use_native_validation(false);
-                        inner.set_valid(valid);
-                    }
+                if inner.value() != self.props.value {
+                    // Avoid calling MDCSelect::set_value() for no reason as it leads to event firing
+                    // which in turn recursively calls the ValueChanged callback closure, which is not allowed
+                    inner.set_value(&self.props.value);
                 }
             }
             true
@@ -117,9 +119,6 @@ impl Component for TextField {
             Msg::ValueChanged(s) => {
                 self.props.onchange.emit(s);
             }
-            Msg::KeyDown(e) => {
-                self.props.onkeydown.emit(e);
-            }
             Msg::FocusRequested => {
                 if let Some(ref inner) = self.inner {
                     inner.focus();
@@ -131,31 +130,41 @@ impl Component for TextField {
 
     fn view(&self) -> Html {
         let disabled = if self.props.disabled {
-            " mdc-text-field--disabled"
+            "" //" mdc-select--disabled"
         } else {
             ""
         };
         let outlined = if self.props.outlined {
-            " mdc-text-field--outlined"
+            " mdc-select--outlined"
         } else {
-            " mdc-text-field--filled"
+            " mdc-select--filled"
         };
         let nolabel = if self.props.nolabel {
-            " mdc-text-field--no-label"
+            " mdc-select--no-label"
         } else {
             ""
         };
         let classes = format!(
-            "mdc-text-field{}{}{} {}",
+            "mdc-select{}{}{} {}",
             disabled, outlined, nolabel, self.props.classes
         );
         let label = if self.props.nolabel {
             html! {}
         } else {
             html! {
-                <label class="mdc-floating-label">
-                    { &self.props.hint }
-                </label>
+                <>
+                    {
+                        if !self.props.outlined {
+                            html! {<span class="mdc-select__ripple"/>}
+                        } else {
+                            html! {""}
+                        }
+                    }
+
+                    <span class="mdc-floating-label">
+                        { &self.props.hint }
+                    </span>
+                </>
             }
         };
         let inner = if self.props.outlined {
@@ -181,32 +190,47 @@ impl Component for TextField {
                 { label }
             </> }
         };
-        let placeholder = if self.props.nolabel && !self.props.hint.is_empty() {
-            &self.props.hint
-        } else {
-            ""
-        };
-        let oninput = self
-            .link
-            .callback(|e: InputData| Msg::ValueChanged(e.value));
         html! {
-            <div class=classes id=&self.props.id ref=self.node_ref.clone()>
-                { self.props.children.clone() }
-                <input type="text"
-                       value=self.props.value
-                       class="mdc-text-field__input"
-                       oninput=oninput
-                       onkeydown=self.link.callback(Msg::KeyDown)
-                       disabled=self.props.disabled
-                       placeholder=placeholder
-                    />
-                { inner }
+            <div class=classes id=&self.props.id ref=self.node_ref.clone() style="width: 250px;">
+                <input type="hidden" value=self.props.value/>
+                <div
+                    class="mdc-select__anchor"
+                    role="button"
+                    aria-haspopup="listbox"
+                    aria-expanded=false>
+                    <span class="mdc-select__ripple"></span>
+                    <span class="mdc-select__selected-text-container">
+                        <span class="mdc-select__selected-text"></span>
+                    </span>
+                    <span class="mdc-select__dropdown-icon">
+                        <svg class="mdc-select__dropdown-icon-graphic" viewBox="7 10 10 5" focusable=false>
+                            <polygon
+                                class="mdc-select__dropdown-icon-inactive"
+                                stroke="none"
+                                fill-rule="evenodd"
+                                points="7 10 12 15 17 10">
+                            </polygon>
+                            <polygon
+                                class="mdc-select__dropdown-icon-active"
+                                stroke="none"
+                                fill-rule="evenodd"
+                                points="7 15 12 10 17 15">
+                            </polygon>
+                        </svg>
+                    </span>
+                    { inner }
+                </div>
+
+                <div class="mdc-select__menu mdc-menu mdc-menu-surface mdc-menu-surface--fullwidth">
+                    { self.props.children.clone() }
+                </div>
             </div>
         }
     }
 
     fn destroy(&mut self) {
         if let Some(inner) = &self.inner {
+            inner.unlisten("MDCSelect:change", &self.change_callback);
             inner.destroy();
         }
     }

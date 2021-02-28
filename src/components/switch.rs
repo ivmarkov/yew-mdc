@@ -20,6 +20,8 @@ pub struct Props {
     pub state: bool,
     #[prop_or_default]
     pub label_text: String,
+    #[prop_or_default]
+    pub disabled: bool,
     #[prop_or_else(Callback::noop)]
     pub onchange: Callback<bool>,
 }
@@ -80,7 +82,10 @@ impl Component for Switch {
         } else {
             ("", false)
         };
-        let classes = format!("mdc-switch{}", on_class);
+        let classes = format!(
+            "mdc-switch{}{}", 
+            on_class, 
+            if self.props.disabled {" mdc-switch--disabled"} else {""});
         let switch = html! {
             <div id=&self.props.id class=classes ref=self.node_ref.clone()>
                 <div class="mdc-switch__track"></div>

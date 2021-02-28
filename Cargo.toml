@@ -10,6 +10,7 @@ default = [
     "fab",
     "icon-button",
     "text-field",
+    "select",
     "menu",
     "drawer",
     "top-app-bar",
@@ -27,6 +28,7 @@ button = []
 fab = []
 icon-button = []
 text-field = []
+select = []
 menu = []
 drawer = []
 top-app-bar = []

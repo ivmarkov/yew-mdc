@@ -31,6 +31,14 @@ cfg_if! {
 }
 
 cfg_if! {
+    if #[cfg(feature = "select")] {
+        pub mod select;
+        pub use select::HelperLine as SelectHelperLine;
+        pub use select::Select;
+    }
+}
+
+cfg_if! {
     if #[cfg(feature = "menu")] {
         pub mod menu;
         pub use menu::Item as MenuItem;

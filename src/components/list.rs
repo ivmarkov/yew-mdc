@@ -59,25 +59,25 @@ pub struct Props {
 
     #[prop_or_default]
     pub role: Role,
-    
+
     #[prop_or_default]
     pub dense: bool,
-    
+
     // #[prop_or_default]
     // pub vertical: bool,
 
     // #[prop_or_default]
     // pub wrapFocus: bool,
-    
+
     // #[prop_or_default]
     // pub typeaheadInProgress: bool,
-    
+
     // #[prop_or_default]
     // pub hasTypeahead: bool,
-    
+
     // #[prop_or_default]
     // pub singleSelection: bool,
-    
+
     // #[prop_or_default]
     // pub selectedIndex: Option<u32>,
 }

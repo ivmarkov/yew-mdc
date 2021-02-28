@@ -87,8 +87,38 @@ extern "C" {
     #[wasm_bindgen(method, setter)]
     pub fn set_disabled(this: &MDCTextField, disabled: bool);
 
+    #[wasm_bindgen(method, setter)]
+    pub fn set_valid(this: &MDCTextField, valid: bool);
+
+    #[wasm_bindgen(method, setter)]
+    pub fn set_use_native_validation(this: &MDCTextField, valid: bool);
+
     #[wasm_bindgen(method)]
     pub fn focus(this: &MDCTextField);
+}
+
+#[cfg(feature = "select")]
+#[wasm_bindgen(module = "@material/select/index")]
+extern "C" {
+    /// Select fields allow users to select values from a predefined list.
+    #[wasm_bindgen(extends = MDCComponent)]
+    pub type MDCSelect;
+
+    #[wasm_bindgen(constructor)]
+    pub fn new(surface: Element) -> MDCSelect;
+
+    #[wasm_bindgen(method, getter)]
+    pub fn value(this: &MDCSelect) -> String;
+    #[wasm_bindgen(method, setter)]
+    pub fn set_value(this: &MDCSelect, value: &str);
+
+    #[wasm_bindgen(method, getter)]
+    pub fn disabled(this: &MDCSelect) -> bool;
+    #[wasm_bindgen(method, setter)]
+    pub fn set_disabled(this: &MDCSelect, disabled: bool);
+
+    #[wasm_bindgen(method)]
+    pub fn focus(this: &MDCSelect);
 }
 
 #[cfg(feature = "menu")]
