@@ -44,6 +44,9 @@ pub struct Props {
     pub id: String,
 
     #[prop_or_default]
+    pub classes: String,
+
+    #[prop_or_default]
     pub role: Role,
 
     #[prop_or_default]
@@ -104,7 +107,9 @@ impl Component for Item {
     }
 
     fn view(&self) -> Html {
-        let classes = format!("mdc-list-item {}", if self.props.selected {"mdc-list-item--selected"} else {""});
+        let classes = format!("mdc-list-item {}{}",
+            self.props.classes,
+            if self.props.selected {" mdc-list-item--selected"} else {""});
         html! {
             <li class=classes
                  ref=self.node_ref.clone()

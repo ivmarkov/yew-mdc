@@ -39,6 +39,8 @@ pub struct Props {
     #[prop_or_default]
     pub children: Children,
     #[prop_or_default]
+    pub trailing_children: bool,
+    #[prop_or_default]
     pub evil_gimme_focus_callback: Option<Callback<Callback<()>>>,
 }
 
@@ -189,9 +191,19 @@ impl Component for TextField {
         let oninput = self
             .link
             .callback(|e: InputData| Msg::ValueChanged(e.value));
+        let leading_children = if !self.props.trailing_children {
+            self.props.children.clone()
+        } else {
+            Children::default()
+        };
+        let trailing_children = if self.props.trailing_children {
+            self.props.children.clone()
+        } else {
+            Children::default()
+        };
         html! {
             <div class=classes id=&self.props.id ref=self.node_ref.clone()>
-                { self.props.children.clone() }
+                { leading_children }
                 <input type="text"
                        value=self.props.value
                        class="mdc-text-field__input"
@@ -201,6 +213,7 @@ impl Component for TextField {
                        placeholder=placeholder
                     />
                 { inner }
+                { trailing_children }
             </div>
         }
     }

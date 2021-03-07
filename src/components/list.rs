@@ -1,10 +1,15 @@
 pub mod list_item;
 pub mod list_item_text;
+pub mod list_item_primary_text;
+pub mod list_item_secondary_text;
 pub mod list_divider;
 pub mod list_group;
 
 pub use list_item::Item;
+pub use list_item::Role as ItemRole;
 pub use list_item_text::ItemText;
+pub use list_item_primary_text::ItemPrimaryText;
+pub use list_item_secondary_text::ItemSecondaryText;
 pub use list_divider::Divider;
 pub use list_group::Group;
 

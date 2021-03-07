@@ -14,6 +14,7 @@ default = [
     "menu",
     "drawer",
     "top-app-bar",
+    "progress-bar",
     "dialog",
     "card",
     "snackbar",
@@ -32,6 +33,7 @@ select = []
 menu = []
 drawer = []
 top-app-bar = []
+progress-bar = []
 card = []
 # These are required to use the data returned by a dialog.
 dialog = ["serde", "serde_json", "wasm-bindgen/serde-serialize"]

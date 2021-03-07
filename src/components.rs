@@ -66,6 +66,13 @@ cfg_if! {
 }
 
 cfg_if! {
+    if #[cfg(feature = "progress-bar")] {
+        pub mod progress_bar;
+        pub use progress_bar::ProgressBar;
+    }
+}
+
+cfg_if! {
     if #[cfg(feature = "card")] {
         pub mod card;
         pub use card::Card;
@@ -119,9 +126,13 @@ cfg_if! {
     if #[cfg(feature = "list")] {
         pub mod list;
         pub use list::List;
+        pub use list::Role as ListRole;
         pub use list::Divider as ListDivider;
         pub use list::Group as ListGroup;
         pub use list::Item as ListItem;
+        pub use list::ItemRole as ListItemRole;
         pub use list::ItemText as ListItemText;
+        pub use list::ItemPrimaryText as ListItemPrimaryText;
+        pub use list::ItemSecondaryText as ListItemSecondaryText;
     }
 }

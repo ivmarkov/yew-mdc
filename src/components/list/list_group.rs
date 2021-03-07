@@ -13,6 +13,9 @@ pub struct Props {
     pub id: String,
 
     #[prop_or_default]
+    pub classes: String,
+
+    #[prop_or_default]
     pub sub_header: Option<String>,
 }
 
@@ -41,6 +44,8 @@ impl Component for Group {
     }
 
     fn view(&self) -> Html {
+        let classes = format!("mdc-list-group {}", self.props.classes);
+
         let maybe_display_header = move || -> Html {
             if let Some(ref text) = self.props.sub_header {
                 html! {<h3 class="mdc-list-group__subheader">{text}</h3>}
@@ -50,7 +55,7 @@ impl Component for Group {
         };
 
         html! {
-            <div class="mdc-list-group"
+            <div class=classes
                  ref=self.node_ref.clone()
                  id=&self.props.id
                  onclick=Callback::noop()

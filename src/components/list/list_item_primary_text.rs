@@ -1,12 +1,14 @@
 use yew::prelude::*;
 
-pub struct Divider {
+pub struct ItemPrimaryText {
     props: Props,
     node_ref: NodeRef,
 }
 
 #[derive(Properties, Clone, PartialEq)]
 pub struct Props {
+    pub children: Children,
+
     #[prop_or_default]
     pub id: String,
 
@@ -14,7 +16,7 @@ pub struct Props {
     pub classes: String,
 }
 
-impl Component for Divider {
+impl Component for ItemPrimaryText {
     type Message = ();
     type Properties = Props;
 
@@ -39,15 +41,15 @@ impl Component for Divider {
     }
 
     fn view(&self) -> Html {
-        let classes = format!("mdc-list-divider {}", self.props.classes);
+        let classes = format!("mdc-list-item__primary-text {}", self.props.classes);
         html! {
-            <li class=classes
+            <span class=classes
                  ref=self.node_ref.clone()
-                 role="divider"
                  id=&self.props.id
                  onclick=Callback::noop()
                 >
-            </li>
+                { self.props.children.clone() }
+            </span>
         }
     }
 }

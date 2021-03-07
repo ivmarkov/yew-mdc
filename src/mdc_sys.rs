@@ -15,7 +15,7 @@ extern "C" {
     pub fn destroy(this: &MDCComponent);
 }
 
-#[cfg(any(feature = "button", feature = "fab", feature = "list"))]
+#[cfg(any(feature = "button", feature = "fab", feature = "list", feature = "select"))]
 #[wasm_bindgen(module = "@material/ripple/index")]
 extern "C" {
     /// MDC Ripple provides the JavaScript and CSS required to provide components
@@ -490,4 +490,29 @@ extern "C" {
 
     #[wasm_bindgen(method, js_name = getScrollContentWidth)]
     pub fn get_scroll_content_width(this: &MDCTabScroller) -> i32;
+}
+
+#[cfg(feature = "progress-bar")]
+#[wasm_bindgen(module = "@material/linear-progress")]
+extern "C" {
+    #[wasm_bindgen(extends = MDCComponent)]
+    pub type MDCLinearProgress;
+
+    #[wasm_bindgen(constructor)]
+    pub fn new(surface: Element) -> MDCLinearProgress;
+
+    #[wasm_bindgen(method, js_name = open)]
+    pub fn open(this: &MDCLinearProgress);
+
+    #[wasm_bindgen(method, js_name = close)]
+    pub fn close(this: &MDCLinearProgress);
+
+    #[wasm_bindgen(method, setter, js_name = determinate)]
+    pub fn set_determinate(this: &MDCLinearProgress, value: bool);
+
+    #[wasm_bindgen(method, setter, js_name = progress)]
+    pub fn set_progress(this: &MDCLinearProgress, value: f64);
+
+    #[wasm_bindgen(method, setter, js_name = buffer)]
+    pub fn set_buffer(this: &MDCLinearProgress, value: f64);
 }
